@@ -1,9 +1,44 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Camera, Globe, Mail, Phone, MapPin, ArrowRight } from "lucide-react";
+import { Camera, Globe, Mail, Phone, MapPin, ArrowRight, Loader2, CheckCircle } from "lucide-react";
 
 export const Footer = () => {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setStatus("loading");
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setStatus("success");
+        setMessage("You're in! 💕");
+        setEmail("");
+      } else {
+        setStatus("error");
+        setMessage(data.error || "Something went wrong.");
+      }
+    } catch {
+      setStatus("error");
+      setMessage("An error occurred.");
+    }
+  };
+
   return (
     <footer className="bg-white border-t border-gray-100 pt-20 pb-10">
       <div className="max-w-7xl mx-auto px-6">
@@ -68,19 +103,35 @@ export const Footer = () => {
             <p className="text-gray-500 font-medium mb-4 leading-relaxed">
               Subscribe to receive updates, access to exclusive deals, and more.
             </p>
-            <form className="relative" onSubmit={(e) => e.preventDefault()}>
+            <form className="relative" onSubmit={handleNewsletterSubmit}>
               <input
                 type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="w-full bg-gray-50 rounded-xl px-4 py-3.5 text-sm font-medium border-none focus:ring-2 focus:ring-[#FF4D8D] outline-none transition-all pr-12"
+                disabled={status === "loading" || status === "success"}
+                className="w-full bg-gray-50 rounded-xl px-4 py-3.5 text-sm font-medium border-none focus:ring-2 focus:ring-[#FF4D8D] outline-none transition-all pr-12 disabled:opacity-60"
               />
               <button
                 type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white hover:bg-[#FF4D8D] transition-colors"
+                disabled={status === "loading" || status === "success"}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white hover:bg-[#FF4D8D] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <ArrowRight size={16} />
+                {status === "loading" ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : status === "success" ? (
+                  <CheckCircle size={14} />
+                ) : (
+                  <ArrowRight size={16} />
+                )}
               </button>
             </form>
+            {message && (
+              <p className={`mt-3 text-xs font-bold ${status === "success" ? "text-green-600" : "text-red-500"}`}>
+                {message}
+              </p>
+            )}
           </div>
         </div>
 
