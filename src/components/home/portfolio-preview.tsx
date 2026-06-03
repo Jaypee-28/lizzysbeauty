@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Camera } from "lucide-react";
+import { ArrowRight, Camera, Search } from "lucide-react";
 import { GalleryImage } from "@/generated/prisma";
 
 export const PortfolioPreview = ({ images }: { images: GalleryImage[] }) => {
@@ -33,8 +33,8 @@ export const PortfolioPreview = ({ images }: { images: GalleryImage[] }) => {
           </motion.h2>
         </div>
 
-        {/* Dynamic Masonry-ish Grid */}
-        <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
+        {/* Gallery-style Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {images.map((img, index) => (
             <motion.div
               key={img.id}
@@ -42,27 +42,28 @@ export const PortfolioPreview = ({ images }: { images: GalleryImage[] }) => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: (index % 4) * 0.1 }}
-              className="relative group rounded-2xl overflow-hidden break-inside-avoid shadow-sm hover:shadow-xl transition-all"
+              className="relative group rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(255,77,141,0.4)] hover:-translate-y-2 transition-all duration-500 cursor-pointer border-[4px] sm:border-[6px] border-white bg-white"
             >
-              {/* Force an aspect ratio but let it be naturally sized. For simplicity, we use an image tag that maintains natural aspect ratio. */}
-              <div className="relative w-full">
+              <div className="relative w-full aspect-[4/5] rounded-2xl sm:rounded-[1.5rem] overflow-hidden">
                 <Image
                   src={img.url}
                   alt={img.caption || "Gallery"}
-                  width={500}
-                  height={500}
+                  fill
                   sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-              </div>
 
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-6">
-                {img.caption && (
-                  <p className="text-white font-bold text-center translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    {img.caption}
-                  </p>
-                )}
+                {/* Sweet Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#FF4D8D]/90 via-[#FF4D8D]/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-end p-4 sm:p-6 pb-6 sm:pb-8 gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white transform translate-y-8 group-hover:translate-y-0 transition-transform duration-500 ease-out">
+                    <Search className="w-4 h-4 sm:w-5 sm:h-5 drop-shadow-md" />
+                  </div>
+                  {img.caption && (
+                    <p className="text-white font-bold text-center text-xs sm:text-lg transform translate-y-8 group-hover:translate-y-0 transition-transform duration-500 ease-out delay-75 drop-shadow-md px-2">
+                      {img.caption}
+                    </p>
+                  )}
+                </div>
               </div>
             </motion.div>
           ))}
